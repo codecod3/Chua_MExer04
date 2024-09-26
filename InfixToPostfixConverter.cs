@@ -1,4 +1,6 @@
-﻿namespace Chua_MExer04
+﻿using NUnit.Framework;
+
+namespace Chua_MExer04
 {
     public static class InfixToPostfixConverter
     {
@@ -23,9 +25,9 @@
             };
         }
 
-        private static bool IsOperatorAndTrigoFunction(string ch)
+        private static bool IsTrigoFunction(string str)
         {
-            return ch switch
+            return str switch
             {
                 "sin" => true,
                 "cos" => true,
@@ -33,6 +35,14 @@
                 "asin" => true,
                 "atan" => true,
                 "acos" => true,
+                _ => false,
+            };
+        }
+
+        private static bool IsOperator(string ch)
+        {
+            return ch switch
+            {
                 "+" => true,
                 "-" => true,
                 "*" => true,
@@ -47,16 +57,23 @@
             string currentNumber = string.Empty;
             var postfix = new Queue<string>();
             string currentLetter = string.Empty;
-            bool isTrigoFunction = false;
+            bool isClosingFirst = false;
             expression = expression.Replace(" ", string.Empty);
             foreach (char ch in expression)
             {
+                if (IsClosingDelimiter(ch)) isClosingFirst = true;
+                if (IsOperator(ch.ToString())) isClosingFirst = false;// if operator is next to closing delimiter, cancel implied multiplication
+                if (IsOpeningDelimiter(ch) && isClosingFirst)
+                {
+                    stack.Push("*");
+                    isClosingFirst = false;
+                }
+
                 if (!char.IsDigit(ch) && !string.IsNullOrEmpty(currentNumber) && !ch.Equals('.'))
                 {
                     postfix.Enqueue(currentNumber);
                     currentNumber = string.Empty;
                 }
-
                 if (ch.Equals('.') || char.IsDigit(ch))
                 {
                     currentNumber += ch;
@@ -64,34 +81,31 @@
                 if (char.IsLetter(ch))
                 {
                     currentLetter += ch;
-                    if (IsOperatorAndTrigoFunction(currentLetter)) isTrigoFunction = true;
-
                 }
                 if (IsOpeningDelimiter(ch)) stack.Push(ch.ToString());
-                if (IsOperatorAndTrigoFunction(ch.ToString()) || isTrigoFunction)
+                if (IsOperator(ch.ToString()) || IsTrigoFunction(currentLetter))
                 {
-                    string pal = string.Empty;
+                    string stuff = string.Empty;
 
-                    if (isTrigoFunction)
+                    if (IsTrigoFunction(currentLetter))
                     {
-                        pal = currentLetter;
+                        stuff = currentLetter;
                         currentLetter = string.Empty;
-                        isTrigoFunction = false;
                     }
-                    else pal = ch.ToString();
+                    else stuff = ch.ToString();
 
-                    if (stack.Count == 0) stack.Push(pal);
+                    if (stack.Count == 0) stack.Push(stuff);
                     
                     else
                     {
                         string peek = stack.Peek();
                         // Algorithm 1.3.A
-                        while (IsOperatorAndTrigoFunction(peek))
+                        while (IsOperator(peek) || IsTrigoFunction(peek))
                         {
-                            int precedence = ComparePrecedence(pal, peek);
+                            int precedence = ComparePrecedence(stuff, peek);
                             if (precedence == 0)
                             {
-                                string op = stack.Pop().ToString();
+                                string op = stack.Pop();
                                 postfix.Enqueue(op);
                             }
                             if (stack.Count == 0 || precedence == 1) break;
@@ -99,7 +113,7 @@
                             peek = stack.Peek();
                         }
 
-                        stack.Push(pal);
+                        stack.Push(stuff);
                         // if precedence of ch is less than peek
                         // pop operator from the stack, enqueue to postfix
                     }
@@ -109,9 +123,9 @@
                 {
                     string peek = stack.Peek();
                     // Algorithm 1.2.A
-                    while (IsOperatorAndTrigoFunction(peek))
+                    while (IsOperator(peek))
                     {
-                        string op = stack.Pop().ToString();
+                        string op = stack.Pop();
                         postfix.Enqueue(op);
                         peek = stack.Peek();
                     }
@@ -127,7 +141,7 @@
             // Algorithm 2
             while (stack.Count > 0)
             {
-                postfix.Enqueue(stack.Pop().ToString());
+                postfix.Enqueue(stack.Pop());
             }
             return postfix;
         }
@@ -153,19 +167,20 @@
         }
         public static int GetPrecedence(string op)
         {
+            if (IsTrigoFunction(op)) return 1;
                 switch (op)
                 {
-                    case "+": return 0;
-                    case "sin": return 0;
-                    case "asin": return 0;
-                    case "cos": return 0;
-                    case "acos": return 0;
-                    case "tan": return 0;
-                    case "atan": return 0;
                     case "-": return 0;
-                    case "*": return 1;
-                    case "/": return 1;
-                    case "^": return 2;
+                    case "+": return 0;
+                    /*case "sin": return 1;
+                    case "asin": return 1;
+                    case "cos": return 1;
+                    case "acos": return 1;
+                    case "tan": return 1;
+                    case "atan": return 1;*/
+                    case "*": return 2;
+                    case "/": return 2;
+                    case "^": return 3;
 
                 }
             

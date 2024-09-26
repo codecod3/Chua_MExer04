@@ -53,7 +53,7 @@ namespace Chua_MExer04
                 "asin" => (float)Math.Asin(x),
                 "acos" => (float)Math.Acos(x),
                 "atan" => (float)Math.Atan(x),
-                _ => throw new InvalidOperationException("Unknown Trigo Function"),
+                _ => throw new InvalidOperationException("Unknown Trigonometric Function"),
             };
 
 

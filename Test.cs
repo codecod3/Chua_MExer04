@@ -9,7 +9,9 @@ namespace Chua_MExer04
 {
     internal class Test
     {
-        [TestCase("cos(3.14159 + 1) + 3 asin(3)", new[] { "cos" })]
+        [TestCase("(3+4)(5-4)", new[] { "cos" })]
+        [TestCase("cos(3.14159 + 1) +  asin(1)", new[] { "3.14159", "1", "+", "cos", "1", "asin", "+" })]
+        [TestCase("sin(3) + 5", new[] { "cos" })]
         [TestCase("8", new[] { "8" })]
         [TestCase("8+9", new[] { "8", "9", "+" })]
         [TestCase("(8+9)", new[] { "8", "9", "+" })]
@@ -32,8 +34,9 @@ namespace Chua_MExer04
         }
 
 
-        
+        [TestCase(new[]{ "3.14159", "1", "+", "cos", "1", "asin", "+" }, 0f)]
         [TestCase(new[] { "3.14159", "1", "+", "cos", "5", "+" }, 17.1f)]
+        [TestCase(new[] { "3.14159", "1", "+", "cos" }, -0.540304422f)]
 
         public void Evaluate_GivenExpression_ReturnExpected(string[] postfix, float expectedResult)
         {
