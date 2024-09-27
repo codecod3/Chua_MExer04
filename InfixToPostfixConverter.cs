@@ -25,7 +25,7 @@ namespace Chua_MExer04
             };
         }
 
-        private static bool IsTrigoFunction(string str)
+        private static bool IsTrigonometricFunction(string str)
         {
             return str switch
             {
@@ -39,9 +39,9 @@ namespace Chua_MExer04
             };
         }
 
-        private static bool IsOperator(string ch)
+        private static bool IsOperator(string str)
         {
-            return ch switch
+            return str switch
             {
                 "+" => true,
                 "-" => true,
@@ -57,16 +57,16 @@ namespace Chua_MExer04
             string currentNumber = string.Empty;
             var postfix = new Queue<string>();
             string currentLetter = string.Empty;
-            bool isClosingFirst = false;
+            bool isImpliedApplicable = false;
             expression = expression.Replace(" ", string.Empty);
             foreach (char ch in expression)
             {
-                if (IsClosingDelimiter(ch)) isClosingFirst = true;
-                if (IsOperator(ch.ToString())) isClosingFirst = false;// if operator is next to closing delimiter, cancel implied multiplication
-                if (IsOpeningDelimiter(ch) && isClosingFirst)
+                if (IsClosingDelimiter(ch)) isImpliedApplicable = true;
+                if (IsOperator(ch.ToString())) isImpliedApplicable = false;// if operator is next to closing delimiter, implied multiplication is not applicable
+                if (IsOpeningDelimiter(ch) && isImpliedApplicable)
                 {
                     stack.Push("*");
-                    isClosingFirst = false;
+                    isImpliedApplicable = false;
                 }
 
                 if (!char.IsDigit(ch) && !string.IsNullOrEmpty(currentNumber) && !ch.Equals('.'))
@@ -83,11 +83,11 @@ namespace Chua_MExer04
                     currentLetter += ch;
                 }
                 if (IsOpeningDelimiter(ch)) stack.Push(ch.ToString());
-                if (IsOperator(ch.ToString()) || IsTrigoFunction(currentLetter))
+                if (IsOperator(ch.ToString()) || IsTrigonometricFunction(currentLetter))
                 {
                     string stuff = string.Empty;
 
-                    if (IsTrigoFunction(currentLetter))
+                    if (IsTrigonometricFunction(currentLetter))
                     {
                         stuff = currentLetter;
                         currentLetter = string.Empty;
@@ -100,7 +100,7 @@ namespace Chua_MExer04
                     {
                         string peek = stack.Peek();
                         // Algorithm 1.3.A
-                        while (IsOperator(peek) || IsTrigoFunction(peek))
+                        while (IsOperator(peek) || IsTrigonometricFunction(peek))
                         {
                             int precedence = ComparePrecedence(stuff, peek);
                             if (precedence == 0)
@@ -123,7 +123,7 @@ namespace Chua_MExer04
                 {
                     string peek = stack.Peek();
                     // Algorithm 1.2.A
-                    while (IsOperator(peek))
+                    while (IsOperator(peek) || IsTrigonometricFunction(peek))
                     {
                         string op = stack.Pop();
                         postfix.Enqueue(op);
@@ -167,17 +167,11 @@ namespace Chua_MExer04
         }
         public static int GetPrecedence(string op)
         {
-            if (IsTrigoFunction(op)) return 1;
+            if (IsTrigonometricFunction(op)) return 1;
                 switch (op)
                 {
                     case "-": return 0;
                     case "+": return 0;
-                    /*case "sin": return 1;
-                    case "asin": return 1;
-                    case "cos": return 1;
-                    case "acos": return 1;
-                    case "tan": return 1;
-                    case "atan": return 1;*/
                     case "*": return 2;
                     case "/": return 2;
                     case "^": return 3;

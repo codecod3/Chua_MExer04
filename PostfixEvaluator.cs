@@ -29,7 +29,7 @@ namespace Chua_MExer04
                     result = Calculate(x, y, item);
                     stack.Push(result);
                 }
-                else if (IsTrigoFunction(item))
+                else if (IsTrigonometricFunction(item))
                 {
                     x = stack.Pop();
                     result = CalculateTrigo(x, item);
@@ -73,7 +73,7 @@ namespace Chua_MExer04
             };
         }
 
-        private static bool IsTrigoFunction(string trigo)
+        private static bool IsTrigonometricFunction(string trigo)
         {
             return trigo switch
             {
